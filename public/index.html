@@ -4,28 +4,194 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Chatbot for Hotel</title>
-    <link rel="stylesheet" href="styles.css">
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Custom Styles for aesthetics not easily done in Tailwind */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* Tailwind: bg-slate-50 */
+        }
+        
+        #chat-window {
+            height: calc(100% - 6rem); /* Adjust height calculation */
+        }
+
+        /* Custom Scrollbar */
+        #chat-window::-webkit-scrollbar {
+            width: 8px;
+        }
+        #chat-window::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1; /* Tailwind: bg-slate-300 */
+            border-radius: 4px;
+        }
+
+        /* Spinner Animation */
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid #3b82f6; /* Tailwind: text-blue-500 */
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+    </style>
 </head>
-<body>
-    <div id="chatbot-container">
-        <h1>Hotel AI Assistant</h1>
-       
-            <div id="chat-window">
-        <p class="bot-message">Hello! I'm your AI hotel assistant. How can I help you with your booking or stay today?</p>
+<body class="flex justify-center items-center min-h-screen p-4 md:p-8">
+    
+    <!-- Chatbot Container -->
+    <div id="chatbot-container" class="bg-white rounded-xl shadow-2xl flex flex-col w-full max-w-lg h-[90vh] md:h-[80vh] overflow-hidden">
         
-        <div id="loading-indicator" class="hidden">
-            <div class="spinner"></div>
-            <p>Bot is typing...</p>
+        <!-- Header -->
+        <header class="bg-blue-600 p-4 text-white text-center rounded-t-xl shadow-lg">
+            <h1 class="text-xl font-bold">The Grand Vista AI Concierge</h1>
+            <p class="text-sm opacity-90">Ask me anything about your stay or booking.</p>
+        </header>
+
+        <!-- Chat Window (Message History) -->
+        <div id="chat-window" class="flex-grow p-4 overflow-y-auto flex flex-col gap-3">
+            <!-- Initial Welcome Message -->
+            <div class="bot-message flex justify-start">
+                <div class="bg-gray-100 p-3 rounded-xl rounded-tl-sm shadow-md max-w-xs md:max-w-md text-gray-800">
+                    Hello! I'm your AI hotel assistant. How can I help you with your booking or stay today?
+                </div>
+            </div>
+
+            <!-- Loading Indicator (hidden by default) -->
+            <div id="loading-indicator" class="flex justify-start hidden">
+                <div class="flex items-center space-x-2 bg-gray-200 p-2 rounded-xl text-gray-600 text-sm">
+                    <div class="spinner"></div>
+                    <span>Bot is typing...</span>
+                </div>
+            </div>
+
         </div>
-        
-    </div>
-    <form id="chat-form">
-        </div>
-        <form id="chat-form">
-            <input type="text" id="user-input" placeholder="Ask about bookings, amenities, or directions..." required>
-            <button type="submit">Send</button>
+
+        <!-- Input Form -->
+        <form id="chat-form" class="p-4 border-t border-gray-200 bg-gray-50">
+            <div class="flex space-x-3">
+                <input 
+                    type="text" 
+                    id="user-input" 
+                    placeholder="Ask about bookings, amenities, or directions..." 
+                    required
+                    class="flex-grow p-3 border border-gray-300 rounded-full focus:ring-blue-500 focus:border-blue-500 transition duration-150 shadow-inner"
+                >
+                <button 
+                    type="submit" 
+                    id="send-button"
+                    class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-full transition duration-150 ease-in-out disabled:bg-blue-300 shadow-md hover:shadow-lg"
+                >
+                    Send
+                </button>
+            </div>
         </form>
     </div>
-    <script src="chat.js"></script>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Get necessary DOM elements
+        const chatForm = document.getElementById('chat-form');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+        const chatWindow = document.getElementById('chat-window');
+        const loadingIndicator = document.getElementById('loading-indicator');
+
+        // --- Helper Functions for UI State ---
+
+        function toggleLoading(show) {
+            if (show) {
+                // Show spinner and disable input/button
+                loadingIndicator.classList.remove('hidden');
+                userInput.disabled = true;
+                sendButton.disabled = true;
+                userInput.placeholder = "Waiting for response...";
+            } else {
+                // Hide spinner and enable input/button
+                loadingIndicator.classList.add('hidden');
+                userInput.disabled = false;
+                sendButton.disabled = false;
+                userInput.placeholder = "Ask about bookings, amenities, or directions...";
+            }
+            // Always scroll to the bottom when state changes
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+
+        function appendMessage(text, sender) {
+            const container = document.createElement('div');
+            const msgElement = document.createElement('div');
+            
+            // Set message styles based on sender
+            if (sender === 'user') {
+                container.className = 'user-message flex justify-end';
+                msgElement.className = 'bg-blue-500 text-white p-3 rounded-xl rounded-br-sm shadow-md max-w-xs md:max-w-md';
+            } else if (sender === 'bot') {
+                container.className = 'bot-message flex justify-start';
+                msgElement.className = 'bg-gray-100 text-gray-800 p-3 rounded-xl rounded-tl-sm shadow-md max-w-xs md:max-w-md';
+            } else { // error
+                container.className = 'bot-error-message flex justify-start';
+                msgElement.className = 'bg-red-100 text-red-700 border border-red-300 p-3 rounded-xl rounded-tl-sm shadow-md max-w-xs md:max-w-md';
+            }
+
+            // Handle new lines and basic markdown (if the bot sends it)
+            msgElement.innerHTML = text.replace(/\n/g, '<br>');
+            container.appendChild(msgElement);
+            chatWindow.appendChild(container);
+            chatWindow.scrollTop = chatWindow.scrollHeight; // Auto-scroll
+        }
+
+
+        // --- Main Form Submission Handler ---
+
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            // 1. Display user message and clear input
+            appendMessage(message, 'user');
+            userInput.value = '';
+
+            // 2. Activate loading state
+            toggleLoading(true);
+
+            // 3. Fetch response from Netlify Function
+            try {
+                const response = await fetch('/.netlify/functions/hotel-bot', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: message })
+                });
+                
+                const data = await response.json();
+                
+                // 4. Display bot response
+                if (response.ok) {
+                    appendMessage(data.reply, 'bot');
+                } else {
+                    // Handle HTTP errors or function errors
+                    appendMessage(`Error: ${data.reply || 'Could not reach the AI service.'} Please ensure your API key is set in Netlify Environment Variables.`, 'bot-error');
+                }
+                
+            } catch (error) {
+                console.error('Network or Fetch Error:', error);
+                appendMessage("A critical network error occurred. Please check your connection or contact support.", 'bot-error');
+            } finally {
+                // 5. Deactivate loading state and re-enable controls
+                toggleLoading(false);
+                userInput.focus(); // Put cursor back in the input field
+            }
+        });
+    </script>
 </body>
 </html>
+
