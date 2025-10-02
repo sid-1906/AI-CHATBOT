@@ -1,0 +1,9 @@
+[build]
+  # The directory that contains the deploy-ready HTML files and assets.
+  publish = "public"
+  # The command to run to build your site (optional for a basic static site).
+  command = "npm run build" 
+
+[functions]
+  # The directory Netlify will look for your serverless functions in.
+  directory = "netlify/functions"

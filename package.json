@@ -1,0 +1,26 @@
+{
+  "name": "ai-chatbot-for-hotel",
+  "version": "1.0.0",
+  "description": "An AI-powered chatbot for hotel inquiries, deployed on Netlify.",
+  "main": "netlify/functions/hotel-bot.js",
+  "scripts": {
+    "dev": "netlify dev",
+    "start": "netlify dev",
+    "build": "echo 'No build script needed for this basic setup, Netlify will deploy public/'",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "openai": "^4.0.0" 
+    /* OR:
+    "@google/genai": "^0.1.0" 
+    */
+    /* Add any other dependencies your function needs */
+  },
+  "keywords": [
+    "netlify",
+    "chatbot",
+    "ai",
+    "openai",
+    "hotel"
+  ]
+}
