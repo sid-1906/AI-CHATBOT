@@ -11,10 +11,7 @@
   },
   "dependencies": {
     "openai": "^4.0.0" 
-    /* OR:
-    "@google/genai": "^0.1.0" 
-    */
-    /* Add any other dependencies your function needs */
+   
   },
   "keywords": [
     "netlify",
