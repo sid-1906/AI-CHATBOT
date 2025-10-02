@@ -134,3 +134,37 @@ h1 {
 #chat-form button:active {
     transform: scale(0.98);
 }
+
+
+/* --- Loading Indicator Styles --- */
+.hidden {
+    display: none !important;
+}
+
+#loading-indicator {
+    align-self: flex-start;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #f0f0f0;
+    padding: 8px 15px;
+    border-radius: 20px;
+    color: #666;
+    font-style: italic;
+    font-size: 0.9em;
+    max-width: fit-content;
+}
+
+.spinner {
+    border: 3px solid rgba(0, 0, 0, 0.1);
+    border-top: 3px solid #007bff; /* Primary Blue color */
+    border-radius: 50%;
+    width: 14px;
+    height: 14px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
